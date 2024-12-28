@@ -11,7 +11,7 @@ Run telegram bot, which executes function `f` repeatedly.
 - `brute_force_alive`: despite all measures, messages sometimes "hangs". You may use this argument to wake up telegram server regularly. When this option is set to `true` it works, but it is not recommended, since it makes additional calls. Consider this feature experimental and use at your own risk.
 - `offset`: telegram message offset, useful if you have processed messages, but bot was interrupted and messages state was lost.
 """
-function run_bot(f, tg::TelegramClient = DEFAULT_OPTS.client; timeout = 20, brute_force_alive = false, offset = -1)
+function run_bot(f, tg::TelegramClient = DEFAULT_OPTS.client; timeout = 20, brute_force_alive = false, offset = -one(Int64))
     if brute_force_alive
         @async while true
             try
@@ -24,27 +24,27 @@ function run_bot(f, tg::TelegramClient = DEFAULT_OPTS.client; timeout = 20, brut
     end
 
     while true
-        try
-            ignore_errors = true
-            res = offset == -1 ? getUpdates(tg, timeout = timeout) : (ignore_errors = false;getUpdates(tg, timeout = timeout, offset = offset) )
+        # try
+            ignore_errors = false
+            res = offset == -one(Int64) ? getUpdates(tg, timeout = timeout) : (ignore_errors = false;getUpdates(tg, timeout = timeout, offset = offset) )
             for msg in res
                 try
                     f(msg)
-                    offset = offset <= get(msg, :update_id, -1) ? get(msg, :update_id, -1) + 1 : offset
+                    offset = offset <= get(msg, :update_id, -one(Int64)) ? get(msg, :update_id, -one(Int64)) + one(Int64) : offset
                 catch err
                     @error err
                     if ignore_errors
-                        offset = offset <= get(msg, :update_id, -1) ? get(msg, :update_id, -1) + 1 : offset
+                        offset = offset <= get(msg, :update_id, -one(Int64)) ? get(msg, :update_id, -one(Int64)) + one(Int64) : offset
                     else
                         rethrow()
                     end
                 end
             end
-        catch err
-            @error err
-            if err isa InterruptException
-                break
-            end
-        end
+        # catch err
+        #     @error err
+        #     if err isa InterruptException
+        #         break
+        #     end
+        # end
     end
 end
