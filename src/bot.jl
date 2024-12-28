@@ -24,7 +24,7 @@ function run_bot(f, tg::TelegramClient = DEFAULT_OPTS.client; timeout = 20, brut
     end
 
     while true
-        try
+        # try
             ignore_errors = false
             res = offset == -one(Int64) ? getUpdates(tg, timeout = timeout) : (ignore_errors = false;getUpdates(tg, timeout = timeout, offset = offset) )
             for msg in res
@@ -40,11 +40,11 @@ function run_bot(f, tg::TelegramClient = DEFAULT_OPTS.client; timeout = 20, brut
                     end
                 end
             end
-        catch err
-            @error err
-            if err isa InterruptException
-                break
-            end
-        end
+        # catch err
+        #     @error err
+        #     if err isa InterruptException
+        #         break
+        #     end
+        # end
     end
 end
